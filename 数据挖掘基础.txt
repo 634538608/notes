@@ -277,42 +277,500 @@ axes子对象：
 			)
 	网格：
 		plt.grid()
+
+	设置分辨率：
+		plt.savefig('test', dpi = 600)  # dpi 分辨率，常用：72，300
+
+数学计算展示图像：
+	# 绘图
+	plt.plot(x,y)
+
+	###############
+
+	# 组件
+
+	# 标题，可以使用$引入部分latex文本排版语法和公式
+	plt.title('线性 $y=ax+b$，非线性 $y=ax^{2}+bx+c$')  
+
+	# 坐标轴标注，当字符串里有反斜杠等转义特殊字符时,字符串前加`r`,表示显示原始字符串
+	plt.xlabel(r'X \axis')  
+
+	###############
+
+	# 操作轴线
+
+	# gca，get corrent axis，获取轴
+	ax = plt.gca()
+
+	# 交换轴线
+	# ax.xaxis.set_ticks_position('top')
+	# ax.yaxis.set_ticks_position('right')
+
+	# 去除上侧和右侧的空白轴线
+	ax.spines['right'].set_color('none')
+	ax.spines['top'].set_color('none')
+
+	# 移位轴线
+	ax.spines['bottom'].set_position(['data', -10])
+	ax.spines['left'].set_position(['data', 0])
+
+	###############
+
+	# 添加注解标识
+
+	# 标记点
+	x0 = -2.5
+	y0 = a * x0 + b
+	ax.scatter(x0, y0, color='red')  # 绘制点
+
+	# 标记线
+	ax.plot(
+	    [x0, x0],
+	    [y0, -10],
+	    'k--',
+	)
+
+	# 任意位置增加文本
+	ax.text(
+	    5,  # x轴
+	    10,  # y轴
+	    '第一象限',  # 显示文本内容
+	    fontsize=16,  # 文字大小
+	    rotation=30,  # 旋转角度
+	)
+	# 任意位置增加带箭头的注释文本
+	ax.annotate(
+	    r'$Linear\ function\ y=ax+b$',  #显示字符串，空格在$内不显示，用反斜杠转义
+	    xy=(x0, y0),  # 箭头位置
+	    xycoords = 'data',  # 相对默认坐标系偏移
+
+	    xytext=(-150, 50),  # 文本位置
+	    textcoords = 'offset points',  # 相对坐标，相对箭头原点偏移
+
+	    arrowprops=dict(  # 字典类型，定义箭头样式
+	        arrowstyle = 'fancy',  # 箭头样式，例如 -> <- |-| simple fancy
+	        color = 'green',  # 箭头颜色
+	        connectionstyle="arc3,rad=.2",  # 箭头弧度
+	    )
+	)
+
+	plt.show()
+
+三维图像：
+	import numpy as np
+	import matplotlib.pyplot as plt
+	from mpl_toolkits.mplot3d import Axes3D  # 载入三维子库
+
+	plt.rcParams['font.family'] = ['Arial Unicode MS', 'sans-serif']
+
+	# GUI输出图像
+	# %matplotlib qt5
+
+	# 创建父对象
+	fig=plt.figure()
+	# 创建子对象（三维）
+	ax=Axes3D(fig)
+
+	# 各轴生成0-100的随机坐标数据20个
+	x = np.random.randint(0, 100, 20)
+	y = np.random.randint(0, 100, 20)
+	z = np.random.randint(0, 100, 20)
+
+	# 绘制散点图
+	ax.scatter(x, y, z)
+	# 绘制折线图
+	ax.plot(x, y, z)
+
+	# 坐标轴名称
+	ax.set_xlabel('x轴')
+	ax.set_ylabel('y轴')
+	ax.set_zlabel('z轴')
+
+	plt.show()
+
+动画：
+	import random
+
+	import numpy as np
+	import matplotlib.pyplot as plt
+	from matplotlib.animation import FuncAnimation  # 载入动画子库
+
+	# GUI输出，动画图像不能在网页展示
+	%matplotlib qt5
+
+	###########################3
+
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+
+	line = []  # 供折线图追加数据
+
+	# 动画每帧调用的函数
+	def update(i):
+	#     print(i)  # frame的值，随调用遍历
+
+	#     # 绘制散点图
+	#     s1 = random.randint(-10, 10)  # x轴坐标数据
+	#     s2 = random.randint(-10, 10)  # y轴坐标数据
+	#     ax.scatter(s1, s2)  # 绘图
+
+	    # 绘制折线图
+	    s = random.randint(-1, 1)  # 生成-1到1的随机数一个
+	    line.append(s)  # 随机数追加至变量line
+	    ax.plot(  # 绘图
+	        np.array(line).cumsum(),  # y轴坐标，line转为数组并累加
+	        color='red'
+	    )
+
+	# 动画方法
+	ani = FuncAnimation(
+	    fig,  # 动画应用的图像
+	    update,  # 动画每帧都要调用的函数
+	    frames = np.arange(1, 50), # 动画帧数，对GIF有效，值调用函数内的i可以获取。不需遍历可用整数如 frames = 50
+	    interval = 100,  # 动画帧间隔，毫秒
+	)
+
+	# 动画保存为GIf图片
+	ani.save('line.gif', dpi=80, writer='imagemagick')
+
+	plt.show()
+
+中文显示：
+	matpoltlib默认不支持中文字符，因为默认设置字体是sans-serif英文字体不能显示汉字
+	解决办法：
+		import matplotlib as plt
+		plt.rcParams['font.family'] = ['Arial Unicode MS', 'sans-serif'] #  全局设置支持中文字体，默认 sans-serif
+
+
+===================numpy================================
+Numpy是Python的开源数值计算库
+	Numpy用于在大型、多维数组（矩阵）上执行数值运算
+	Numpy是Scipy/Pandas/scikit-learn等科学计算、数据分析、机器学习库的基础库，也是Python数据挖掘的基础
+
+numpy的优点：
+	数组的运算
+	矢量化运算
+		优势：
+			去掉元素间运算所需要的循环和细节处理
+			运算速度快
+
+array数组：
+	n维数组对象，存储单一数据类型的多维数组，简称数组
+	接收一切序列型对象，如list tuple  
+	默认数组值类型相同，创建时自动指定数据类型(内存占用最大的值类型）
+		np.bool			布尔值
+		np.int			整型
+		np.float		浮点型
+		np.unicode_		Unicode所有字符，字节数平台决定
+
+array数组对象属性：
+	.dtype	对象的元素类型
+	.size	对象元素的个数，相当于.shape中的n*m的值
+	.shape	轴，数组形状，对于矩阵，n行m列
+	.ndim	秩，相当于有多少个维度
+
+数据的维度应用：
+	0维，单个数值，文本数据
+	1维，一维list列表，一维ndarray数组
+	2维，表格，CSV，关系型数据库
+		可以看做简化版的多维数据格式（行列键值对）
+	多维，能组织表达一切
+		数组嵌套形式：多层list或array嵌套
+		标签形式:XML，HTML
+		键值对形式:
+			字典：Python专用
+			通用：
+				JSON,有数据类型的键值对(应用于不同系统间的信息交互,例如移动端和服务器的API接口交互)
+				YAML,TOML等,无数据类型的键值对(系统/软件的配置文件)
+				非关系型数据库,MongoDB等
+numpy创建特定数组：
+	为了实现某些运算，需要快速构造符合要求的大数组
+	numpy函数生成的数组，如果不指定类型，除了arange是整型以外，其他全是浮点型
+
+	np.arange(n)	
+		类似range()函数(递增的整数序列)，元素从0到n-1
+	np.linspace()	
+		根据起止数据等间距填充数据形成数组
+	np.ones(shape)	
+		根据shape生成一个全1数组，shape是元组类型
+	np.ones_like(ndarray)	
+		以另一个数组为参数，根据其形状和dtype创建全1数组
+	np.zeros(shape)	
+		根据shape生成一个全0数组，shape是元组类型
+	np.zeros_like(ndarray)	以另一个数组为参数，
+		根据其形状和dtype创建全0数组
+	np.empty(shape)	
+		创建新数组只分配内存空间，随意填充一些垃圾值
+	np.empty_like(ndarray)
+		以另一个数组为参数，根据其形状和dtype创建填充值数组
+	np.full(shape,val)	
+		根据shape生成一个数组，每个元素都是val
+	np.full_like(a,val)	
+		根据数组a的形状生成一个全 val 数组
+	np.eye(n)
+		创建一个正方的n*n单位矩阵，对角线为1，其余为0
+	np.diag(list)	
+		创建一个正方形矩阵，对角线为参数值
+
+使用numpy.random 随机数创建特定数组
+	.rand(d0,d1,..dn)	
+		创建d0-dn维度的均匀分布的随机数数组，浮点数，范围从0-1
+	.uniform(low,high,(size))	
+		产生具有均匀分布的数组，low起始值，high结束值，size形状
+	.randint(low,high,(shape))	
+		从给定上下限范围选取随机数整数，范围是low,high，形状是shape
+	.randn(d0,d1,..dn)	
+		创建d0-dn维度的标准正态分布随机数，浮点数，平均数0，标准差1
+	.normal(loc,scale,(size))	
+		从指定正态分布中随机抽取样本，分布中心是loc（概率分布的均值）,标准差是scale，形状是size
+	.seed(s)	
+		随机数种子，s是给定的种子值。因为计算机生成的是伪随机数，所以通过设定相同的随机数种子，可以每次生成相同的随机数、
+
+查询修改：
+	索引：获取数组中特定位置的元素
+	切片：获取数组中特定元素的子集
+		一维索引和切片
+		多维索引和切片
+		布尔索引和切片
+	根据值获取索引
+
+	data = np.arange(28).reshape(7, 4)：
+		生成28个数7行，4列的数组
+
+一维数组的索引和切片：
+	和列表类似
+多维数组的索引和切片：
+	索引：
+		a[1,2,3]:取第一维度第一个第二维度第二个第三维度第三个
+	切片：
+		a[:,0:2,1:3]：按","分割，第一个维度按第一个切片以此类推
+
+布尔型索引：
+	names = np.array(['张三','李四','王五','张三','王五','李四','李四'])
+	data = np.arange(28).reshape(7, 4)
+	
+	names == '张三'
+	--->array([ True, False, False,  True, False, False, False])
+
+	names[names == '张三']
+	-->array(['张三', '张三'], dtype='<U2')
+
+	data[names == '张三']
+	-->array([[ 0,  1,  2,  3],
+       [12, 13, 14, 15]])
+       相当于取了和张三索引一样的值
+
+
+	# 可将布尔型数组跟切片、整数、整数序列混合使用
+	data[names == '张三', 2:]
+	-->array([[ 2,  3],
+       [14, 15]])
+       先按张三的索引取值再切片
+
+    逻辑运算：
+    	组合多个布尔型索引，进行逻辑运算
+		组合条件，逻辑运算符：& 且，| 或，非（!= 或 ~）
+    	mask = (names == '张三') | (names == '王五')
+    	data(mask)
+    	-->array([[ 0,  1,  2,  3],
+       [ 8,  9, 10, 11],
+       [12, 13, 14, 15],
+       [16, 17, 18, 19]])
+       按张三和王五的索引一起取值
+
+数组元素的修改：
+	无论索引、切片还是布尔索引，只要选中元素，为其赋值即可修改
+
+数组变换：
+	数据维度变换、类型变换是产生新ndarray数组的进阶方式
+	.reshape(shape)	
+		返回一个shape形状的数组，修改视图，不改变原数组，
+	.resize(shape)	
+		与.reshape()功能相同，但修改原数组
+	.flatten()
+		对数组降维，返回折叠后的一维数组，修改视图，不改变原数组
+类型变换：astype
+	new_a = a.astype(new_type)，只修改视图，不改变原数组
+
+	np.bool		布尔值
+	np.int		整型
+	np.float	浮点型
+	np.complex	复数
+	np.object	对象
+	np.string_	ASCII字符
+	np.unicode_	Unicode所有字符，字节数平台决定
+
+数组运算：
+	都会元素相运算
+
+	abs	绝对值
+	sqrt	平方根，等价于 arr ** 0.5
+	square	平方，等价于 arr ** 2
+	logical_not	计算各元素not x的真值，等价于 -arr
+	sign	计算每个元素的符号：，1(正数)，0(零)，-1(负数)
+	modf	分别返回小数数和整数部分的数组
+	log, log10, log2, log1p	自然对数（底数为e），底数为10的对数，底数为2的对数和 log(1 + x)
+	exp	以e为底的指数函数 ex，2.71828 ** x
+	cos, cosh, sin sinh, tan, tanh	三角函数，普通型和双曲型
+	arccos, arccosh, arcsin, arcsinh, arctan, arctanh	反三角函数
+
+数组统计运算:
 	
 
+	sum	求和
+	cumsum	累加
+	cumprod	累乘
+		相当于每次多加一个元素得到的值生成的新数组
+	diff	相邻数组元素的差值
+	mean	算术平均值
+	average	加权平均值，weights加权值，不设为等权重
+	var, std	方差：各数与平均数之差的平方的平均数
+	标准差：方差平方根
+	median	中位数
+	min, max	最大值和最小值
+	ptp	极差，最大值与最小值的差
+	argmin, argmax	返回选中值1维扁平化后的最小值／最大值的索引
+
+		以上运算中都可以带上参数：axis  表示从内到外运算几维
+			c = array([[0, 1, 2],
+				       [3, 4, 5],
+				       [6, 7, 8]])
+			np.sum(c)
+			-->36
+			np.sum(c,axis=1)
+			-->array([ 3, 12, 21])
+
+用于布尔型数组的方法
+	统计运算中，布尔值会被强制转换为1和0，可以使用sum()对布尔型数组中的True值计数
+
+	# 计数非0值个数
+	np.count_nonzero(arr > 0)
+	bools.any() #测试数组中是否存在一个或多个True
+	bools.all() #数组中所有值是否都是True
+	any() 和 all() 也可用于非布尔型数组，所有非0元素将会被当作True
+
+numpy 数据存取
+	将数据以二进制的格式存储
+		存储：np.save('文件名',数据)
+		读取：c = np.load('文件名')
+	将数据以二进制的格式存储为压缩包
+		存储：np.save('文件名', ar0 = 数据a, ar1 = 数据b)
+		读取：d = np.load('y.npz') 
+			d["ar0"]
+
+CSV文件存取:	Comma-Separated Value
+
+	csv文件只能存储一维、二维数据，不能存储多维数据
+	存入：
+		np.savetxt(frame, array, fmt='%.18e', delimiter = None)
+
+		frame	
+			存储文件、字符串或产生器的名字，可以是.gz或.bz2的压缩文件，对大型数据有用，压缩后存储或读取，节省存储资源
+		array	
+			存入文件的数组
+		delimiter	
+			分隔字符串，默认是任何空格，需要改为 逗号
+		fmt	写入文件中每个元素的字符串格式
+			%s (ASCII字符)
+			%d （整数）
+			%.2f（2位小数的浮点数）
+			%.18e（科学计数法，常用）
+				np各类型元素存储到CSV中都是字符串，字符串显示的格式，默认%.18e，科学计数法，保留18位小数的浮点数形式存储数据，需要根据情况修改
+
+		np.savetxt(文件名, 数据, fmt='%.18e', delimiter = None)
+	读取：
+		np.loadtxt(frame,dtype=np.float,delimiter=None,skiprows=0,usecols=None,unpack=False)
+
+		frame	文件、字符串或产生器，可以是.gz或bz2压缩文件
+		dtype	数据类型，可选，CSV的字符串以什么数据类型读入数组中，默认np.float	浮点数
+		delimiter	分隔字符串，默认是任何空格，改为 逗号
+		skiprows	跳过前x行，一般跳过第一行表头
+		usecols	读取指定的列，索引，元组类型
+		unpack	如果True，读入属性将分别写入不同数组变量，False 读入数据只写入一个数组变量，默认False
+
+		b = np.loadtxt('a.csv', delimiter=',') # 默认浮点型
+		b = np.loadtxt('a.csv', dtype = np.int, delimiter = ',') #数据为整型
+
+		#b = np.loadtxt('a.csv', dtype = np.str, delimiter = ',') #数据为字符串，输出默认带 b，要去掉用下面方式输出：
+		b = np.loadtxt('a.csv', dtype = bytes, delimiter = ',').astype(str)
+		b = np.loadtxt('a.csv', dtype = bytes, delimiter = ',', skiprows = 1, usecols=(2, 3)).astype(str) #跳过第一行，读入第3、4列
+
+numpy-数组操作:
+	排序：
+		a = np.random.randint(1, 100, 50)
+		np.sort(a)#升序
+		-np.sort(-a)#降序
+
+		b = np.random.randint(1, 100, (3, 5))
+		np.sort(b, axis = 0) # 0维，按行
+		np.sort(b, axis = 1) # 1维，按列
+
+数组转置：a.T
+数组转成list：a.tolist()
+
+数组合并：concatenate
+	a = np.array([[1,2,3],[4,5,6],[7,8,9]])
+	b = np.array([[10,11,12]])
+
+	np.concatenate((a, b), axis = 0)  # 按行拼接
+	np.concatenate((a, b.T), axis = 1)  # 按列拼接
+
+数组删除：delete
+	a = np.array([[1,2,3,4], [5,6,7,8], [9,10,11,12]])
+	# 删除行
+	b1 = np.delete(a, 1, axis=0) 
+	# 删除列
+	b2 = np.delete(a, -1, axis=1)  
+	# 删除多列
+	b3 = np.delete(a, [1,2], axis=1)
+
+高级函数：
+	shuffle(a)	
+		将数组a的第0轴(最外维度)进行随机排列(洗牌)，改变数组a
+	permutation(a)	
+		同上，区别是不改变数组a
+	.choice(a, size=None, replace=True, p=None)	
+		从一维数组a中以概率p抽取元素，形成size形状新数组，replace表示是否可以重用元素，默认为Ture，p为抽取概率
+
+	b = array([266, 126, 997, 528, 321, 370, 124, 157])
+	 np.random.choice(b, (3, 2),replace=False, p = b/np.sum(b))
+	 -->array([[997, 528],
+		       [266, 321],
+		       [126, 370]])
+
+numpy集合运算 
+	unique(x):去重 排序
+	union1d(x,y):合并 去重 排序
+	intersect1d(x,y)：交集 去重 排序
+	setxor1d(x,y)：交集的反集 
+	setdiff1d(x,y)：x-交集
+	in1d(x,y)：x是否包含于y 返回布尔数组
+
+	注意：上面的'1'都是数字1不是‘l'
+
+广播机制：
+	当两个数组维数不一样进行计算时，会以小就大，小的自动增加维数，进行计算。
+	a=array([0, 1, 2, 3, 4])
+	b=array([5])
+	a+b
+	#b = array([5,5,5,5,5])
+	c= array([[0, 1, 2, 3, 4],
+       		 [5, 6, 7, 8, 9]])
+     a+c
+     #a=array([[0, 1, 2, 3, 4],
+     		   [0, 1, 2, 3, 4]])
+
+矩阵运算：
+	x = np.array([[1,2],[3,4]])
+	x[0].T 是不能进行转置的
+	应该这样：
+		x[0].reshape(1,2).T
+
+	矩阵乘法：
+		np.dot(x, x)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+================Pandas===================================
 
 
 
