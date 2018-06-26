@@ -1,0 +1,322 @@
+数据挖掘流程
+	基本流程
+		提出问题
+		准备数据
+		分析数据
+		洞察结论
+	拓展流程
+		需求层
+			目标确定
+		数据层
+			数据获取
+			数据规整（清晰）
+				清理、转换、合并、重塑
+				数据重构、特征工程
+			分析层
+				描述性分析
+				探索性分析
+			输出层
+				洞察结论 应用成果
+
+============matplotlib=====================================
+
+Python可视化库生态（拓展）
+	Matplotlib 二维底层绘图库
+		Seaborn 上层图表库，基于Matplotlib
+	VTK 三维底层绘图库
+		Mayavi 三维上层绘图库
+	Web交互式图表库
+		Bokeh：交互式图表库，Web端，基于D3
+		Plotly：交互式图表库，Web端，基于D3
+
+
+WEB前端可视化库(基于JavaScript)生态（拓展）
+	D3.js：
+		JS绘图底层库。https://d3js.org/
+	Echarts：
+		可视化图表。百度：http://echarts.baidu.com/
+	AntV：
+		可视化图表。阿里：https://antv.alipay.com/index.html
+	可视化数据大屏：
+		交互的实时数据可视化视屏墙。https://data.aliyun.com/visual/datav
+	其他WEB前端绘图技术
+		Flash
+		canvas
+		WebGL https://threejs.org/
+
+折线图：plot
+	pyplot.plot([0,2,4,6,8]) # 默认Y轴坐标
+	pyplot.plot([0,2,4,6,8],[1,5,3,9,7]) 
+	pyplot.show() #显示图片
+
+
+	plot的参数：
+		线条颜色，color='g'
+		线条风格，linestyle='--'
+		线条粗细，linewidth=5.0
+		标记风格，marker='o'
+		标记颜色，markerfacecolor='b'
+		标记尺寸，markersize=20
+		透明度，alpha=0.5
+
+			eurcny = [数据]
+			date = [数据]
+			plt.plot(
+			    date, # x轴数据，日期
+			    eurcny, # y轴数据，收盘价
+
+			    color='r', # 线条颜色
+			    linestyle='--', # 线条风格
+			    linewidth=2, # 线条粗细
+
+			    marker='o', # 标记风格
+			    markerfacecolor='#ffff00', # 标记颜色
+			    markersize=5, # 标记大小
+
+			    alpha=0.5, # 透明度
+			)
+			
+			plt.show()
+
+散点图/气泡图：scatter
+	x = [1,3,5,7,9,11,13,15,17]
+	y = [2,-5,19,3,5,8,12,6,1]
+	plt.scatter(x, y)
+	plt.show()
+
+
+	样式参数：
+		s[100,200,300,400...]
+			表示每个点的大小，可以写一个数值和多个数值，如果写的数量小于点的数量，会循环取值，大于点的数量只会取一部分数值
+
+
+柱状图：bar
+	width :柱子的宽度，默认0.8 设置时不大于1
+条形图：barh 
+	相当于柱状图 x,y 轴互换
+	height :柱子的宽度，默认0.8 设置时不大于1
+	yticks:设置Y轴的坐标数据,这时实际上是设置的x轴的数据
+
+	x = [1,2,3,4,5]
+	y = [3,6,1,8,2]
+	plt.bar(x, y)
+	plt.show()
+	plt.barh(x,y)
+	plt.yticks(x,['a','b','c','d','e'])
+	plt.show()	
+	
+	多个柱状图在一起显示的时候，更改x轴数据的显示要计算好bar的宽度
+
+饼状图：pie
+	p = [15,30,45,10]
+	plt.pie(p)
+	plt.show()
+
+	参数：
+		labels = 名称列表,  # 名称，和数据在列表的的位置要对应
+	    explode=(0,0.05,0,0,0,0,0,0,0),  # 突出块，突出比例
+	    autopct='%1.1f%%',  # 显示百分比方式
+	    shadow=False,  # 阴影效果
+	    startangle=250,  # 饼图起始的角度,度数,默认0为右侧水平180度开始，逆时针旋转
+
+	# 国名
+	mark = ['America','China','India','Saudi','Russia','Japan','Britain','Germany','France']
+	# 各国占9国总军费的比例
+	percent = [0.5548467,0.14444868,0.05094268,0.04846696,0.046753,0.04418206,0.04161112,0.03799276,0.03075605]
+
+	plt.pie(
+	    percent,  # 百分比
+	    labels = mark,  # 名称
+	    explode=(0,0.05,0,0,0,0,0,0,0),  # 突出块，突出比例
+	    autopct='%1.1f%%',  # 显示百分比方式
+	    shadow=False,  # 阴影效果
+	    startangle=25 0,  # 饼图起始的角度,度数,默认0为右侧水平180度开始，逆时针旋转
+	)
+
+	plt.axis('equal') #正圆形饼图,x/y轴尺寸相等.默认是扁图,
+
+	plt.show()
+
+直方图：hist
+	h1 = [ 88.2,  83.5,  68.8,  85.4,  78.6,  69.3,  60.6,  91.2,  52.7,
+        85.9,  57.1,  68. ,  66.6,  78.2,  78.8,  85. ,  89.1,  74.4,
+        93.6,  75.7,  54.3,  55. ,  90.9,  79.4,  94.4,  86.7,  82.4,
+        76.7,  78.7,  72.3,  83.9,  78.6,  80. ,  70.5,  87.1,  80.3,
+        87.9,  65.1,  67.4,  61.5,  49.7,  77.1,  91.4,  72. ,  61.5,
+        73.9,  76.9,  88.2,  51.2,  53.9]
+        plt.hist(h1)
+
+		plt.show()
+
+	plt.hist(
+    h1,  # 直方图数据
+    10,  # 直方个数
+    normed=1,  # 默认0 数据出现个数，1 出现个数归一化为出现的频率(频率=出现次数/总数)
+    histtype='bar',  # 直方图样式：默认bar，stepfilled填充颜色，step不填充只有线条
+    facecolor='b',  # 直方图颜色
+    edgecolor = 'g',  # 直方图边框颜色
+    alpha=0.3,
+	)
+
+	# 直方图叠加
+	plt.hist(h2, 10, normed=1, histtype='bar', alpha = 0.3)
+
+	plt.show()
+
+箱线图：boxplot
+	用作显示一组数据离散情况的统计图表，常用作多组数据的综合统计比较
+
+	四分位数：
+		第一四分位数/Q1/较小四分位数
+			该样本中所有数值由小到大排列后第25%的数
+		第二四分位数/Q2/中位数
+			该样本中所有数值由小到大排列后第50%的数
+		第三四分位数/Q3/较大四分位数
+			该样本中所有数值由小到大排列后第75%的数
+
+	5个统计量：
+		最大值：上边线
+		Q3
+		Q2
+		Q1
+		最小值：下边线
+
+	异常值：
+		Q3和Q1的差
+		大于Q3 1.5倍四分位数差的值，或者小于Q1 1.5倍四分位数差的值
+
+热力图：imshow
+	a = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+	]
+	plt.imshow(a)
+
+	plt.show()
+
+	参数：
+		cmap='gray',  # 配色，gray灰度
+	    origin='lower', # 水平翻转，默认upper,lower
+	    interpolation='lanczos', # 渲染，模糊
+		plt.colorbar() #侧栏
+
+figure父对象：
+	figure父对象是与用户交互的整个窗口
+	用于在同一文件内绘制多个图像时的区分
+
+axes子对象：
+	figure对象中包含一个或多个axes(ax)子对象
+	每个ax子对象都是一个拥有自己独立坐标系的绘图区域
+	用于在同一图像内绘制多个子图像的区分		
+
+创建多个父对象：
+	plt.figure(num, figsize = (width, heigh))
+	num：图像编号
+	width，height：图像宽度，高度
+
+创建多个子对象
+	plt.subplot(nrows, ncols, plot_number)
+	nrows，横轴数量，类似表格的 行
+	ncols，纵轴数量，类似表格的 列
+	plot_number，当前绘制的ax子图位置，横轴x,纵轴y
+
+设置标题：set_title('爱我中华')
+
+父对象子对象结合：
+	# 图表1
+	plt.figure(1) # 创建figure父窗口，默认编号为1
+
+	plt.subplot(121)
+	plt.subplot(122) # 创建ax子窗口，1行2列，选中第2个
+	plt.plot([1,3,2])
+
+	# 图表2
+	plt.figure(2)
+
+	plt.subplot(131)
+	plt.subplot(132)
+	plt.subplot(133)
+	plt.plot([1,2,3])
+
+	plt.show()
+
+图像组件：
+	用于调整图像各组成部分的样式
+
+	图表标题：
+			plt.title(
+		    'hello图表标题',
+		    color = '#00ff00',
+		    fontsize = 24,
+		)
+	坐标轴标注（名称）：
+		plt.xlabel('X axis')
+		plt.ylabel('Y轴标注')
+
+	刻度设置和刻度标注：
+		plt.yticks([1,3,6,9,12,15,18,20])  # 设置坐标刻度步长
+		plt.xticks(
+		    [0,1,2,5,8,10],  # 刻度设置
+		    ['2000','2001','2002','2005','2008','2010'],  # 刻度标注
+		    fontsize = 14,  # 文字大小
+		    rotation = 90,  # 旋转角度
+		)
+
+	坐标范围：
+		# plt.axis([-1,11,-2,12]) # X轴-1到11,Y轴-2到12
+		plt.xlim([-1,11])  # x轴坐标范围：-1到11
+		plt.ylim([-2,12])  # y轴坐标范围：-2到12
+
+	图例：
+		首先需要在plot()里面加上label（‘图例的名称’）
+		plt.legend(
+		    handles = [n1,n2],  # 给指定数据绘制图例
+		    loc = 'upper right',  # 图例位置
+		    frameon=  False  # 有无边框
+			)
+	网格：
+		plt.grid()
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

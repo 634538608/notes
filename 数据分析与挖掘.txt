@@ -1,0 +1,340 @@
+第十章--Python数据分析与挖掘技术基础-------
+
+什么是数据分析
+	对一只的数据进行分析，然后提取出一些有价值的信息，比如统计出平均数，标准差等信息，数据分析的数据量可能不会太大
+
+什么是数据挖掘
+	对大量的数据进行分析与挖掘，得到一些未知的，有价值的信息等，比如从网站的用户或用户行为数据中挖掘出用户的潜在需求信息，从而对网站进行改善
+
+	数据分析与数据挖掘密不可分，数据挖掘是数据分析的提升。
+
+	数据挖掘技术可以帮助我们更好的发现事物之间的规律
+
+数据挖掘的主要过程：
+	1 定义目标
+	2 获取数据
+		常用的手段有通过爬虫采集或者下载一些统计网站发布的数据
+	3 数据探索
+	4 数据预处理
+		数据清洗（去掉脏数据），数据集成（集中），数据变换（规范化），数据规约（精简）
+	4 数据建模（分类 聚类 关联 预测）
+	6 模型评价与发布
+
+模块简介
+	numpy
+		高效的处理数据，提供数组支持，pandas、scipy、matplotlib的安装使用都依赖于numpy
+	pandas
+		用的较多的模块，用于数据探索和数据分析
+	matplotlib
+		作图模块，解决可视化问题
+	scipy
+		用于数值计算，同事支持矩阵运算，并提供了很多高等数据处理功能，如积分，傅里叶变换，微分方程求解等
+	statsmodels 
+		用于统计分析
+	Gensim
+		用于文本挖掘
+	sklearn
+		机器学习
+	keras
+		深度学习
+	
+
+模块的基本使用
+	
+	numpy
+		创建一位数组
+			a = numpy.array([元素1，元素2，，，元素n])
+			a[1]=元素2
+		创建二维数组
+			b = numpy.array([a,b,c],[d,e,f],[x,y,z])
+			b[2][2]=z
+		排序
+			a.sort()
+		取最大值
+			a.max()
+		取最小值
+			a.mix()
+		切片
+			数组[起始下标：最终下标+1]
+			a[:3] 从最开始取值
+			a[1:]  取到最后边一个
+
+	pandas
+
+		series:
+			某一串数据
+			a = pandas.Series([1,2,3,4,7,8,9])
+
+		DataFrame:数据框
+			数组的方式创建数据框
+				pandas.DataFrame([[1,2,3],[4,5,6],[7,8,9]])
+					指定列名
+						c = pandas.DataFrame([[1,2,3],[4,5,6],[7,8,9]],columns=['one','two','three'])
+
+			字典的形式创建数据框
+				e = pandas.DataFrame({
+				'one':4,
+				'two':[6,3,4],
+				'three':list(str(789))
+				})
+
+			e.head() 头部数据，默认前五行
+			e.head(行数)
+
+			e.tail() 尾部数据 默认后五行
+			etail(行数)
+
+			d.describe()
+				count:计数
+				mean:平均数
+				std:标准差
+				min:数据的最小值
+				25%
+				50%
+				75%：分位数
+				max:每一列的最大值
+
+			d.T()
+				将数据转置
+
+		导入csv数据
+			csv是一种常见的数据存储格式，基本上我们所遇到的数据都可以转为这种存储格式
+
+			a = pandas.read_csv('数据路径')
+			a.describe()
+			a.sort_values(by=列数)
+				按照哪一列排序
+
+		导入excel数据
+			a = pandas.read_excel('数据路径')
+
+		导入mysql数据库中的数据
+			import pymysql
+			开启数据库
+			连接数据库
+				conn = pymysql.connect(host='127.0.0.1',passwd='root',db='hexun')
+			sql='select * from myhexun'
+			aa = pandas.read_slq (sql,conn)
+			aa.describe() 
+
+		导入html数据
+			使用pandas 可以直接从html网页中加载对应tale表格中的数据，但是在使用read_html()之前需要先安装html5lib 与beautifulsoup4模块
+
+			kl = pandas.read_html(地址)
+				只能读取html中的表格标签
+
+		导入文本数据
+			kl = pandas.read_table(地址)
+
+
+十一章---python数据可视化分析实现-----------
+
+import matplotlib.pylab
+import numpy
+
+折线图/散点图 plot
+	x=[1,2,3,4,5]
+	y=[4,5,7,8,3]
+	pylab.plot(x,y,展现形式#可以可无)
+	pylab.show()
+
+	散点图
+		pylab.plot(x,y,‘o’)
+		pylab.show()
+	
+	改变颜色
+		pylab.plot(x,y,‘c’)
+		c---cyan      青色
+		r--red        红色
+		m--magente    平红
+		g--green      绿色
+		b--blue       蓝色
+		y--yellow     黄色
+		k--black      黑色
+		w--white      白色
+
+	红色的散点图
+		pylab.plot(x,y,‘or’)
+
+	线条的样式
+		-   直线
+		--  虚线
+		-.  虚线
+		：   点虚线
+
+	点的样式：设置点的样式之后默认为散点图
+		s   方形
+		h   六角形
+		H   六角形
+		*   星形
+		+   加号
+		X   X形
+		d   菱形
+		D   菱形
+		p   五角形
+
+	pylab.title(标题)：添加标题
+	pylab.xlabel()：X轴标题
+	pylab.ylabel()：Y轴标题 
+
+	设置X Y 轴的长度
+		pylab.xlim(0,20)
+		pylab.ylim(10,100)
+
+	同一个区域绘制多个线段
+		x1=[1,2,3,4,5]
+		y1=[4,5,7,8,3]
+		x2=[3,5,6,7,3]
+		y2=[1,3,4,5,2]
+		pylab.plot(x1,y1)
+		pylab.plot(x2,y2)
+		pylab.show()
+	
+直方图 hist
+	统计某一个数据出现的频数
+
+	随机数的生成：
+		import numpy 
+		data = numpy.random.random_integers(最小值，最大值，个数)
+
+	生成具有正态分布的随机数	
+		正态分布两个参数u q u代表均数  q 代表平缓陡峭 
+		data2=numpy.random.nomal(均数，西格玛，个数)
+		data2=numpy.random.nomal(10.0，1.0，10000)
+
+	生成直方图：
+		data2=numpy.random.nomal(均数，西格玛，个数)
+		pylab.hist(data2) 
+
+	设置直方图的宽高
+		import numpy 
+		data = numpy.random.random_integers(最小值，最大值，个数)
+		sty = numpy.arange(最小值，最大值，宽度#步长)
+		pylab.hist(data,sty，histtype=样式参数#可不传)
+		pylab.show()
+
+	样式参数:histtype
+		stepfilled:取消轮廓
+
+	子图：
+	同一张图绘制多张子图片
+		pylab.subplot(行数，列数，第几个)
+		pylab.show()
+
+		绘制子图：
+			pylab.subplot(2,2,1)
+			x1=[1,3,4,5,6,2]
+			y1=[3,5,6,8,3,2]
+			pylab.plot()
+			pylab.subplot(2,2,2)
+			x2=[1,3,4,5,6,2]
+			y2=[3,5,6,8,3,2]
+			pylab.plot()
+			pylab.subplot(2,1,2)
+			x3=[1,3,4,5,6,2]
+			y3=[3,5,6,8,3,2]
+			pylab.plot()
+			pylab.show()
+
+	读取数据 画图进行数据分析
+		import pandas
+		import numpy 
+		import matplotlib
+
+		data=pandas.read_csv(路径)
+		data.shape() #得到基本的行列的数据
+		data.values(行，列)  #对应的行列的数据
+		data2=data.T  #将数据转置之后拿出数据
+		 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,993 @@
+复制文件到指定目录：
+	cp 1.txt  ~/Desktop/1.txt
+
+===================model====================
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'test2', #数据库名字，
+        'USER': 'root', #数据库登录用户名
+        'PASSWORD': 'mysql', #数据库登录密码
+        'HOST': 'localhost', #数据库所在主机
+        'PORT': '3306', #数据库端口
+    }
+}
+
+字段类型：
+	AutoField：
+		自动增长的IntegerField，通常不用指定，不指定时Django会自动创建属性名为id的自动增长属性。
+	BooleanField：
+		布尔字段，值为True或False。
+	NullBooleanField：
+		支持Null、True、False三种值。
+	CharField(max_length=字符长度)：
+		字符串。参数max_length表示最大字符个数。
+	TextField：
+		大文本字段，一般超过4000个字符时使用。
+	IntegerField：
+		整数。
+	DecimalField(max_digits=None,decimal_places=None)：
+		十进制浮点数。参数max_digits表示总位数。参数decimal_places表示小数位数。
+	FloatField：
+		浮点数。
+	DateField[auto_now=False, auto_now_add=False])：
+		日期。参数auto_now表示每次保存对象时，自动设置该字段为当前时间，用于"最后一次修改"的时间戳，它总是使用当前日期，默认为false。参数auto_now_add表示当对象第一次被创建时自动设置当前时间，用于创建的时间戳，它总是使用当前日期，默认为false。参数auto_now_add和auto_now是相互排斥的，组合将会发生错误。
+	TimeField：
+		时间，参数同DateField。
+	DateTimeField：
+		日期时间，参数同DateField。
+	FileField：
+		上传文件字段。
+	ImageField：
+		继承于FileField，对上传的内容进行校验，确保是有效的图片。
+
+选项：
+	null：
+		如果为True，表示允许为空，默认值是False。
+	blank：
+		如果为True，则该字段允许为空白，默认值是False。
+	对比：
+		null是数据库范畴的概念，blank是表单验证范畴的。
+	db_column：
+		字段的名称，如果未指定，则使用属性的名称。
+	db_index：
+		若值为True, 则在表中会为此字段创建索引，默认值是False。
+	default：
+		默认值。
+	primary_key：
+		若为True，则该字段会成为模型的主键字段，默认值是False，一般作为AutoField的选项使用。
+	unique：		
+		如果为True, 这个字段在表中必须有唯一值，默认值是False
+
+
+条件运算符：
+	exact：表示判等
+		list=BookInfo.objects.filter(id__exact=1)
+		可简写为：
+		list=BookInfo.objects.filter(id=1)
+
+	contains：是否包含。
+		list = BookInfo.objects.filter(btitle__contains='传')
+	startswith、endswith：以指定值开头或结尾。
+	isnull：是否为null。
+	in：是否包含在范围内
+	gt、gte、lt、lte：大于、大于等于、小于、小于等于
+	不等于的运算符，使用exclude()过滤器
+	year、month、day、week_day、hour、minute、second：对日期时间类型的属性进行运算。
+
+
+F对象：	
+	比较两个属性的值的大小
+	from django.db.models import F
+	list = BookInfo.objects.filter(bread__gte=F('bcomment'))
+	list = BookInfo.objects.filter(bread__gt=F('bcomment') * 2)
+
+Q对象：
+	实现逻辑或or的查询，需要使用Q()对象结合|运算符
+	多个过滤器逐个调用表示逻辑与关系，同sql语句中where部分的and关键字
+	from django.db.models import Q
+	查询阅读量大于20的图书
+	list = BookInfo.objects.filter(Q(bread__gt=20))
+	查询阅读量大于20，或编号小于3的图书
+	list = BookInfo.objects.filter(Q(bread__gt=20) | Q(pk__lt=3))
+	查询编号不等于3的图书
+	list = BookInfo.objects.filter(~Q(pk=3))
+
+
+
+过滤器：
+	all()：
+		返回所有数据。
+	filter()：
+		返回满足条件的数据。
+	exclude()：
+		返回满足条件之外的数据，相当于sql语句中where部分的not关键字
+	order_by()：
+		对结果进行排序
+	get()：
+		返回单个满足条件的对象
+		如果未找到会引发"模型类.DoesNotExist"异常。
+		如果多条被返回，会引发"模型类.MultipleObjectsReturned"异常。
+	count()：
+		返回当前查询结果的总条数。
+	aggregate()：
+		使用aggregate()过滤器调用聚合函数。聚合函数包括：Avg，Count，Max，Min，Sum，被定义在django.db.models中。返回字典类型数据
+		from django.db.models import Sum
+		list = BookInfo.objects.aggregate(Sum('bread'))
+		使用count时一般不使用aggregate()过滤器
+		list = BookInfo.objects.count()
+
+两大特性
+	惰性执行：
+		创建查询集不会访问数据库，直到调用数据时，才会访问数据库，调用数据的情况包括迭代、序列化、与if合用。
+	缓存：
+		使用同一个查询集，第一次使用时会发生数据库的查询，然后把结果缓存下来，再次使用这个查询集时会使用缓存的数据。
+
+关联查询：
+	由一到多：
+		一对应的模型类对象.多对应的模型类名小写_set
+		b = BookInfo.objects.get(id=1)
+		b.heroinfo_set.all()
+	由多到一：
+		多对应的模型类对象.多对应的模型类中的关系类属性名
+		h = HeroInfo.objects.get(id=1)
+		h.hbook
+	访问一对应的模型类关联对象的id：
+		多对应的模型类对象.关联类属性_id
+		h = HeroInfo.objects.get(id=1)
+		h.book_id
+	关联模型类名小写__属性名__条件运算符=值：
+		list = BookInfo.objects.filter(heroinfo__hcontent__contains='八')
+	由一模型类条件查询多模型类数据：
+		list = HeroInfo.objects.filter(hbook__btitle='天龙八部')
+
+自关联：
+	省市县
+
+
+实例方法：
+	str()：
+		在将对象转换成字符串时会被调用。
+	save()：
+		将模型对象保存到数据表中，ORM框架会转换成对应的insert或update语句。
+	delete()：
+		将模型对象从数据表中删除，ORM框架会转换成对应的delete语句。
+
+自定义模型管理器：
+	class BookInfo(models.Model):
+    books = models.Manager()
+    主要用于两种情况：
+    	1.修改原始查询集，重写all()方法
+    		class BookInfoManager(models.Manager):
+    			def all(self):
+		        #默认查询未删除的图书信息
+		        #调用父类的成员语法为：super().方法名
+        		return super().all().filter(isDelete=False)
+		2.向管理器类中添加额外的方法，如向数据库中插入数据。
+			class BookInfoManager(models.Manager):
+			    #创建模型类，接收参数为属性赋值
+			    def create_book(self, title, pub_date):
+			        #创建模型类对象self.model可以获得模型类
+			        book = self.model()
+			        book.btitle = title
+			        book.bpub_date = pub_date
+			        book.bread=0
+			        book.bcommet=0
+			        book.isDelete = False
+			        # 将数据插入进数据表
+			        book.save()
+			        return book
+元选项：
+	在模型类中定义类Meta，用于设置元信息，如使用db_table自定义表的名字。
+	class BookInfo(models.Model)：
+    	#定义元选项
+	    class Meta:
+	      db_table='bookinfo' #指定BookInfo生成的数据表名为bookinfo
+
+
+===================view=================================
+获取值：	
+	使用正则，需要在正则表达式中使用小括号，分为两种方式：
+	位置参数：
+		url(r'^delete(\d+)/$',views.show_arg),
+	关键字参数：
+		url(r'^delete(?P<id1>\d+)/$',views.show_arg),
+
+关闭调试信息：
+	DEBUG = False
+	ALLOWED_HOSTS = ['*', ]
+
+自定义404页面：
+	在templates中创建404.html
+
+HttpReqeust对象
+	服务器接收到http协议的请求后，根据报文自动创建创建HttpRequest对象。视图的第一个参数必须是HttpRequest对象，在django.http模块中定义了HttpRequest对象的API。
+
+	属性：
+		path：
+			一个字符串，表示请求的页面的完整路径，不包含域名和参数部分。
+		method：
+			一个字符串，表示请求使用的HTTP方法，常用值包括：'GET'、'POST'。
+			在浏览器中给出地址发出请求采用get方式，如超链接。
+			在浏览器中点击表单的提交按钮发起请求，如果表单的method设置为post则为post请求。
+		encoding：
+			一个字符串，表示提交的数据的编码方式。
+			如果为None则表示使用浏览器的默认设置，一般为utf-8。
+			这个属性是可写的，可以通过修改它来修改访问表单数据使用的编码，接下来对属性的任何访问将使用新的encoding值。
+		GET：
+			QueryDict类型对象，类似于字典，包含get请求方式的所有参数。
+		POST：
+			QueryDict类型对象，类似于字典，包含post请求方式的所有参数。
+		FILES：
+			一个类似于字典的对象，包含所有的上传文件。
+		COOKIES：
+			一个标准的Python字典，包含所有的cookie，键和值都为字符串。
+		session：
+			一个既可读又可写的类似于字典的对象，表示当前的会话，只有当Django 启用会话的支持时才可用，详细内容见"状态保持"。
+
+QueryDict对象:
+	django 自定义的类似字典的类，用来处理同一个键带多个值的情况。
+	在 python 原始的字典中，当一个键出现多个值的时候会发生冲突，只保留最后一个值。而在 HTML 表单中，通常会发生一个键有多个值的情况， <select multiple> （多选框）就是一个很常见情况。
+
+	定义在django.http.QueryDict
+	HttpRequest对象的属性GET、POST都是QueryDict类型的对象
+	get()：根据键获取值
+		如果一个键同时拥有多个值将获取最后一个值
+		如果键不存在则返回None值，可以设置默认值进行后续处理
+		dict.get('键',默认值)
+			可简写为
+		dict['键']
+
+	getlist()：
+		根据键获取值，值以列表返回，可以获取指定键的所有值
+		如果键不存在则返回空列表[]，可以设置默认值进行后续处理
+
+GET属性
+	请求格式：在请求地址结尾使用?，之后以"键=值"的格式拼接，多个键值对之间以&连接
+
+POST属性
+	使用form表单请求时，method方式为post则会发起post方式的请求，需要使用HttpRequest对象的POST属性接收参数，POST属性是一个QueryDict类型的对象。
+
+HttpResponse对象：
+	方法：	
+		_init_：创建HttpResponse对象后完成返回内容的初始化。
+		set_cookie：设置Cookie信息。
+			set_cookie(key, value='', max_age=None, expires=None)
+			max_age：
+				整数，表示在指定秒数后过期。
+			expires：
+				datetime或timedelta对象，会话将在这个指定的日期/时间过期。
+			max_age与expires二选一。如果不指定过期时间，在关闭浏览器时cookie会过期。
+		delete_cookie(key)：
+			删除指定的key的Cookie，如果key不存在则什么也不发生。
+		write：向响应体中写数据。
+
+	JsonResponse：
+		ajax请求时，返回json格式的数据。继承自HttpResponse对象，被定义在django.http模块中，创建对象时接收字典作为参数。
+		content-type为'application/json'。
+
+		示例：
+		1.from django.http import JsonResponse
+		def json1(request):
+			return render(request,'booktest/json1.html')
+		def json2(request):
+			return JsonResponse({'h1':'hello','h2':'world'})
+		2.在booktest/urls.py文件中配置url。
+		3.创建目录static/js/，把jquery文件拷贝到这个目录下
+		4.打开test3/settings.py文件，在文件最底部，配置静态文件查找路径，并且要求开启调试
+			DEBUG = True
+			STATICFILES_DIRS = [
+			    os.path.join(BASE_DIR, 'static'),
+			]
+		5.写一个有ajax请求的html文件
+
+	HttpResponseRedirect：
+		当一个逻辑处理完成后，不需要向客户端呈现数据，从一个视图转到另外一个视图，就称为重定向。
+		正儿八经写：
+			from django.http import HttpResponseRedirect
+			# 定义重定义向视图，转向首页
+			def red1(request):
+			    return HttpResponseRedirect('/')
+		简写：
+			from django.shortcuts import redirect
+			def red1(request):
+			    return redirect('/')
+
+状态保持
+	浏览器请求服务器是无状态的
+	应用层面的原因：
+		浏览器和服务器之间的通信都遵守HTTP协议。
+	根本原因：
+		浏览器与服务器是使用Socket套接字进行通信的，服务器将请求结果返回给浏览器之后，会关闭当前的Socket连接，而且服务器也会在处理页面完毕之后销毁页面对象。
+
+	状态保持方式：
+		cookie：
+			由服务器端生成，发送给User-Agent保存，再次请求同一网站将其发送个服务器。服务器可以知道该用户是否是合法用户以及是否需要重新登录。
+			特点：
+				Cookie以键值对的格式进行信息的存储。
+				Cookie基于域名安全，不同域名的Cookie是不能互相访问的，如访问itcast.cn时向浏览器中写了Cookie信息，使用同一浏览器访问baidu.com时，无法访问到itcast.cn写的Cookie信息。
+			set_cookie:
+			def cookie_set(request):
+			    response = HttpResponse("<h1>设置Cookie，请查看响应报文头</h1>")
+			    response.set_cookie('h1', '你好')
+			    return response
+			get_cookie:
+				def cookie_get(request):
+				    response = HttpResponse("读取Cookie，数据如下：<br>")
+				    if 'h1' in request.COOKIES:
+				        response.write('<h1>' + request.COOKIES['h1'] + '</h1>')
+				    return response
+		Session：
+			启用session：
+				打开test3/settings.py文件，在项MIDDLEWARE_CLASSES中启用Session中间件。
+			3种存储方式：
+				1存储在数据库中：
+					SESSION_ENGINE='django.contrib.sessions.backends.db'
+					--需要在项INSTALLED_APPS中安装Session应用，默认已安装。
+				2存储在缓存中：
+					SESSION_ENGINE='django.contrib.sessions.backends.cache'
+				3混合存储：优先从内存中存取，没有则从数据库中存取。
+					SESSION_ENGINE='django.contrib.sessions.backends.cached_db'
+			
+			依赖于Cookie
+				在使用Session后，会在Cookie中存储一个sessionid的数据，每次请求时浏览器都会将这个数据发给服务器，服务器在接收到sessionid后，会根据这个值找出这个请求者的Session。浏览器必须支持	cookie
+
+			对象及方法：
+				存：
+					request.session['键']=值
+				取：
+					request.session.get('键',默认值)
+				清除session（删除值部分）：
+					request.session.clear()
+				清除session（整条数据）：
+					request.session.flush()
+				删除session（指定键及值）
+					del request.session['键']
+				设置会话的超时时间：
+					request.session.set_expiry(value)
+					如果value是一个整数，会话将在value秒没有活动后过期。
+					如果value为0，那么用户会话的Cookie将在用户的浏览器关闭时过期。
+					如果value为None，那么会话永不过期。
+					如果没有指定过期时间则两个星期后过期
+
+			Redis存储Session
+				1）安装包
+					pip install django-redis-sessions==0.5.6
+				2）修改test3/settings文件，增加如下项：
+					SESSION_ENGINE = 'redis_sessions.session'
+					SESSION_REDIS_HOST = 'localhost'
+					SESSION_REDIS_PORT = 6379
+					SESSION_REDIS_DB = 2
+					SESSION_REDIS_PASSWORD = ''
+					SESSION_REDIS_PREFIX = 'session'
+				3）设置session
+				4）管理redis的命令，需要保证redis服务被开启
+					查看：ps ajx|grep redis
+					启动：sudo service redis start
+					停止：sudo service redis stop
+					使用客户端连接服务器：redis-cli
+					切换数据库：select 2
+					查看所有的键：keys *
+					获取指定键的值：get name
+
+
+=============template================================
+
+模板语言包括4种类型：
+	变量：{{变量}}
+	标签：{%代码段%}
+
+		{%for item in 列表%}
+		循环逻辑
+		{{forloop.counter}}表示当前是第几次循环，从1开始
+		{%empty%}
+		列表为空或不存在时执行此逻辑
+		{%endfor%}
+
+		{%if ...%}
+		逻辑1
+		{%elif ...%}
+		逻辑2
+		{%else%}
+		逻辑3
+		{%endif%}
+
+	过滤器：
+		使用管道符号|来应用过滤器，用于进行计算、转换操作，可以使用在变量、标签中。
+		如果过滤器需要参数，则使用冒号:传递参数。
+
+		变量|过滤器:参数
+		例：
+			设置时间显示格式：
+			value|date:"Y年m月j日  H时i分s秒"
+
+		自定义过滤器：奇数行显示红色，偶数行显示蓝色
+			1）在应用中创建templatetags目录，当前示例为"booktest/templatetags"，创建_init_文件，内容为空。
+			2）在“templatetags"目录下创建filters.py文件
+				#导入Library类
+				from django.template import Library
+
+				#创建一个Library类对象
+				register=Library()
+
+				#使用装饰器进行注册
+				@register.filter
+				#定义求余函数mod，将value对2求余
+				def mod(value):
+				    return value%2 == 0
+			3）在templates/booktest/temp_filter.html中，使用自定义过滤器。
+				首先使用load标签引入模块：{%load filters%}
+				在遍历时根据编号判断奇偶
+					{%for book in list%}
+						<li style="background-color:red">
+						{{book.btitle}}
+						{{book.bpub_date}}
+						</li>
+						{%else%}
+	注释：
+		单行：{#...#}
+		多行：{%comment%} {%endcomment%}
+
+	模板继承：
+		类的继承含义是一样的，为了提高代码重用
+		典型应用：网站的头部、尾部信息
+
+		父模板
+			如果发现在多个模板中某些内容相同，那就应该把这段内容定义到父模板中。
+			{%block 名称%}
+			预留区域，可以编写默认内容，也可以没有默认内容
+			{%endblock  名称%}
+
+		子模板：
+			子模版不用填充父模版中的所有预留区域，如果子模版没有填充，则使用父模版定义的默认值。
+				
+			{% extends "父模板路径"%}
+			{%block 名称%}
+			需要填充的内容
+			{%endblock  名称%}
+	html转义：
+		<  &lt;
+		>  &gt;
+		'  &#39;
+		"  &quot;
+		&  &amp;
+
+		{{t1|escape}}：打开转义，默认开启
+		{{data|safe}}：关闭转义
+		{%autoescape off%}  {%endautoescape%}
+			多行禁用转义
+
+	字符串字面值
+		对于在模板中硬编码的html字符串，不会转义。
+
+	CSRF：
+		全拼为Cross Site Request Forgery，译为跨站请求伪造。
+		过程：
+			小明填写用户名密码请求正常网站
+			登录成功后，正常网站向浏览器中写入cookie信息
+
+			小明未退出正常网站，请求钓鱼网站，钓鱼网站获取信息
+			钓鱼网站模拟小明在正常网站上操作
+		防止：
+			重要的信息传递都采用POST方式而不是GET方式。
+
+		解决办法：
+			Django提供了防止csrf攻击的中间件用于防止CSRF攻击
+			，在settings.py中启用csrf中间件即可。
+			在所有的form表单中使用标签crsf_token.
+				{% csrf_token %}
+		保护原理:
+			当启用中间件并加入标签csrf_token后，会向客户端浏览器中写入一条Cookie信息，这条信息的值与隐藏域input元素的value属性是一致的，提交到服务器后会先由csrf中间件进行验证，如果对比失败则返回403页面，而不会进行后续的处理。
+
+		验证码：
+			可以使用Pillow图像处理库。
+
+		反向解析：
+			功能的增加会出现更多的视图，如果之前的正则表达式表达不准确需要修改，就要修改所有的超链接，反向解析可以动态生成正则表达式。
+
+			使用位置：
+				模板中的超链接
+					<a href="{% url 'booktest:detail' %}">detail</a>
+
+				视图中的重定向
+					from django.shortcuts import render,redirect
+					from django.core.urlresolvers import reverse
+				    return redirect(reverse('booktest:index'))
+		URL的参数：
+			位置参数：
+				超链接：
+					<a href="{% url 'booktest:delete'  book.id %}">删除</a>
+				重定向：
+					return redirect(reverse('booktest:fan2', args=(2,3)))
+			关键字参数：
+				超链接：
+					<a href="{%url 'booktest:fan2' id=100 age=18%}">
+				重定向：
+					return redirect(reverse('booktest:fan2', kwargs={'id':100,'age':18}))
+
+===============other====================================
+
+静态文件处理：
+	项目中的CSS、图片、js都是静态文件，Django中提供了一种解析的方式配置静态文件路径，由于有些静态文件在项目中是通用的，所以推荐放在项目的根目录下，方便管理。
+
+	settings.py文件中定义静态文件存放的物理目录。
+		STATIC_URL = '/static/'
+		STATICFILES_DIRS = [
+		    os.path.join(BASE_DIR, 'static'),
+		]
+
+		可以修改一下 STATIC_URL = '/abc/'
+		html页面中可以隐藏真实路径
+		可以网址和真实地址之间没有关系
+	
+	这种方案可以隐藏真实的静态文件路径，但是结合Nginx布署时，会将所有的静态文件都交给Nginx处理，而不用转到Django部分，所以这项配置就无效了。
+
+中间件：
+	可以介入Django的请求和响应处理过程，修改Django的输入或输出。其它的MVC框架也有这个功能，名称为IoC。
+
+	预置的五个方法：
+		1）初始化：无需任何参数，服务器响应第一个请求的时候调用一次，用于确定是否启用当前中间件。
+
+			def __init__(self):
+		    	pass
+		2）处理请求前：在每个请求上，request对象产生之后，url匹配之前调用，返回None或HttpResponse对象。
+
+			def process_request(self, request):
+		    	pass
+		3）处理视图前：在每个请求上，url匹配之后，视图函数调用之前调用，返回None或HttpResponse对象。
+
+			def process_view(self, request, view_func, *view_args, **view_kwargs):
+		    	pass
+		4）处理响应后：视图函数调用之后，所有响应返回浏览器之前被调用，在每个请求上调用，返回HttpResponse对象。
+
+			def process_response(self, request, response):
+		    	pass
+		5）异常处理：当视图抛出异常时调用，在每个请求上调用，返回一个HttpResponse对象。
+
+			def process_exception(self, request,exception):
+		    	pass
+
+	用法：
+		1）在booktest/目录下创建middleware.py文件
+			class my_mid:
+			    def __init__(self):
+			        print '--------------init'
+
+			    def process_request(self,request):
+			        print '--------------request'
+
+			    def process_view(self,request, view_func, *view_args, **view_kwargs):
+			        print '--------------view'
+
+			    def process_response(self,request, response):
+			        print '--------------response'
+			        return response
+		2）在settings.py文件中，向MIDDLEWARE_CLASSES项中注册。
+			‘booktest.middleware.my_mid’，
+		3）访问网页的时候就会在后台打印相应的数据。
+
+		如果多个注册的中间件类中都有process_exception的方法，则先注册的后执行。
+
+	admin 站点管理：
+		实际开发中用的不多。略
+	上传图片：
+		使用其它方法 略
+
+分页：使用paginator
+	Django提供了数据分页的类，这些类被定义在django/core/paginator.py中。 类Paginator用于对列进行一页n条数据的分页运算。类Page用于表示第m页的数据。
+
+	from django.core.paginator import Paginator
+	def index(request,pIndex):
+    b_list = BookInfo.objects.all()#总数据
+    p = Paginator(b_list,10)#每页10条
+    if pIndex == '':
+        pIndex ='1'
+    pIndex=int(pIndex)
+    booklist = p.page(pIndex)#分页后某一页的数据
+    plist = p.page_range #页码列表
+    context={'booklist':booklist,'plist':plist,'pIndex':pIndex}
+    return  render(request,'booktest/index.html',context)
+
+
+   url(r'^(?P<pIndex>[0-9]*)$',views.index,name='index'),
+
+   {% for book in booklist %}
+	{{ book.btitle }}---<a href="{% url 'booktest:delete'  book.id %}">删除</a><br>
+	{% endfor %}
+	{% for pindex in plist %}
+    {% if pIndex == pindex %}
+    {{ pindex }}
+    {% else %}
+    <a href="{% url 'booktest:index' pindex %}">{{ pindex }}</a>
+    {% endif %}
+	{% endfor %}
+
+=========================第三方===========================
+富文本编辑器：（以tinymce为例）
+	安装：
+		pip install django-tinymce==2.6.0
+	应用：
+		1）在test6/settings.py中为INSTALLED_APPS添加编辑器应用。
+				INSTALLED_APPS = (
+				    'tinymce',
+				)
+		2）在test6/settings.py中添加编辑器配置。
+			TINYMCE_DEFAULT_CONFIG = {
+			    'theme': 'advanced',
+			    'width': 600,
+			    'height': 400,
+			}
+		3）在test6/urls.py中配置编辑器url
+			urlpatterns = [
+			    url(r'^tinymce/', include('tinymce.urls')),
+			]
+
+		admin中使用：
+			1）在booktest/models.py中
+				from django.db import models
+				from tinymce.models import HTMLField
+
+				class GoodsInfo(models.Model):
+				    gcontent=HTMLField()
+			2）生成迁移文件进行迁移
+			3）在booktest/admin.py中注册模型类GoodsInfo
+				from django.contrib import admin
+				from booktest.models import *
+				class GoodsInfoAdmin(admin.ModelAdmin):
+				    list_display = ['id']
+
+				admin.site.register(GoodsInfo,GoodsInfoAdmin)
+			4）打开admin后台管理就可以看到
+		自定义：
+			1）定义视图，配URL，使页面能正常使用
+			2）在项目目录下创建静态文件目录static/js
+			3)打开目录
+				/home/python/.virtualenvs/django_py3/lib/python3.5/site-packages/tinymce/static/tiny_mce
+				拷贝tiny_mce_src.js文件、langs文件夹以及themes文件到static/js/
+			4）settings.py
+				STATICFILES_DIRS=[
+				    os.path.join(BASE_DIR,'static'),
+				]
+			5）在templates/booktest/目录下创建editor.html，并在浏览器中显示这个模版
+				<script type="text/javascript" src='/static/js/tiny_mce_src.js'></script>
+			    <script type="text/javascript">
+			        tinyMCE.init({
+			            'mode':'textareas',
+			            'theme':'advanced',
+			            'width':400,
+			            'height':100
+			        });
+			    </script>
+
+		显示：
+			提交的数据因为html转义。不会直接在浏览器上显示格式，而是以文本的形式展现出来。
+
+			两种方式关闭转义：
+				1, {{data|safe}}
+				2, {%autoescape off%}
+				   {%endautoescape%}
+
+全文检索：
+	haystack：全文检索的框架，
+		支持whoosh、solr、Xapian、Elasticsearc四种全文检索引擎
+	whoosh：全文搜索引擎
+		纯Python编写的全文搜索引擎，虽然性能比不上sphinx、xapian、Elasticsearc等，但是无二进制包，程序不会莫名其妙的崩溃，对于小型的站点，whoosh已经足够使用
+	jieba：中文分词包
+		一款免费的中文分词包，如果觉得不好用可以使用一些收费产品。
+
+	配置及使用：
+		1）在虚拟环境中依次安装需要的包
+			pip install django-haystack
+			pip install whoosh
+			pip install jieba
+		2）修改settings.py文件，在应用中注册安装应用haystack。
+			INSTALLED_APPS = ('haystack',)
+		3）在settings.py文件中配置搜索引擎。
+			HAYSTACK_CONNECTIONS = {
+			    'default': {
+			        #使用whoosh引擎
+			        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+			        #索引文件路径
+			        'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+			    }
+			}
+			#当添加、修改、删除数据时，自动生成索引
+			HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+		4）在test6/urls.py中添加搜索的配置。
+			  url(r'^search/', include('haystack.urls')),
+
+		5）在booktest目录下创建search_indexes.py文件。
+			from haystack import indexes
+			from booktest.models import GoodsInfo
+			#指定对于某个类的某些数据建立索引
+			#索引类名格式：模型类名+Index
+			class GoodsInfoIndex(indexes.SearchIndex, 
+			#索引字段 use_template = True 指定根据表的哪些字段建立索引文件的说明 放在一个文件中
+			indexes.Indexable):
+			    text = indexes.CharField(document=True, use_template=True)
+
+			    def get_model(self):
+			    #返回模型类
+			        return GoodsInfo
+
+			    def index_queryset(self, using=None):
+			        return self.get_model().objects.all()
+		6)在templates目录下创建
+			"search/indexes/booktest/goodsinfo_text.txt"目录.
+			#指定索引的属性
+			{{object.gcontent}}
+			注意：goodsinfo_text.txt 名字不要写错，是有规范的，以
+ 				导入的模型类类名小写+_text.txt
+ 		7)初始化索引数据，执行完以后会生成whoosh_index目录
+ 			python manage.py rebuild_index
+ 		8）在views.py中定义视图query，在url.py中配置
+ 			def query(request):
+    			return render(request,'booktest/query.html')
+    		url(r'^query/', views.query),
+    	9）创建query.html
+    		使用form表单必须以get方式请求‘search/’，需要搜索的内容的名字必须是'name="q"'
+    	10) 自定义搜索结果模板：
+    		在templates/search/目录下创建search.html。
+    	11）对搜索结果进行分页。
+    		query：搜索关键字
+			page：当前页的page对象
+			paginator：分页paginator对象
+		12）参数q表示搜索内容，传递到模板中的数据为query 
+			参数page表示当前页码
+
+发送邮件：
+	使用步骤：
+		1）注册163邮箱，登陆后设置，POP3/SMTP/IMAP
+		2)勾选客户端授权密码，开启SMTP/POP3/IMA0P服务
+		3）在setting.py文件
+			EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+			EMAIL_HOST = 'smtp.163.com'
+			EMAIL_PORT = 25
+			#发送邮件的邮箱
+			EMAIL_HOST_USER = 'xx@163.com'
+			#在邮箱中设置的客户端授权密码
+			EMAIL_HOST_PASSWORD = 'xxxxxx'
+			#收件人看到的发件人
+			EMAIL_FROM = 'python<xx@163.com>'
+		4）在views.py中新建视图，
+			from django.conf import settings
+			from django.core.mail import send_mail
+			from django.http import HttpResponse
+			def send(request):
+			    msg='<a href="http://www.baidu.com" target="_blank">点击激活</a>'
+			    send_mail('注册激活','',settings.EMAIL_FROM,
+			              [''],
+			              html_message=msg)
+			    return HttpResponse('ok')
+		5)在url.py中配置，并访问，注意开启外网。
+			url(r'^send/$',views.send),
+
+celery:
+	发现一个错误：
+		from celery.utils.timeutils import timedelta_seconds
+		ImportError: No module named timeutils
+	原因：	
+		celery4.0 和djcelery3.1.17版本不兼容，
+		应该安装3.1.X版本celery
+
+	用户发起request，并等待response返回。在views中可能需要执行一段耗时的程序，就会造成用户由于等待时间过程降低用户体验效果。
+	这些耗时的操作可以使用celery 去执行。
+
+	celery名词:
+		任务task：就是一个Python函数。
+		队列queue：将需要执行的任务加入到队列中。
+		工人worker：在一个新进程中，负责执行队列中的任务。
+		代理人broker：负责调度，在布置环境中使用redis
+
+	使用方法：
+		1）在settings.py中安装
+			INSTALLED_APPS = {'djcelery',}  
+		2)在setting.py文件中配置代理和任务模块
+			import djcelery
+			djcelery.setup_loader()
+			BROKER_URL = 'redis://127.0.0.1:6379/2'
+		3）在应用目录下创建tasks.py文件
+			from django.conf import settings
+			from django.core.mail import send_mail
+			from celery import task
+			@task
+			def sayhello():
+			    msg='<a href="http://www.itcast.cn/subject/pythonzly/index.shtml" target="_blank">点击激活</a>'
+			    send_mail('注册激活','',settings.EMAIL_FROM,
+			              ['itcast88@163.com'],
+			              html_message=msg)
+		4)在views.py文件
+			from booktest import tasks
+			def sayhello(request):
+			    tasks.sayhello.delay()
+			    return HttpResponse("done")
+		5)执行迁移生成celery需要的数据表
+			python manage.py migrate
+		6）启动Redis
+			sudo service redis start
+		7)启动worker
+			python manage.py celery worker --loglevel=info
+
+部署：
+	搭建服务器虚拟环境：
+		1）在本机进入虚拟环境，执行命令导出当前需要的所有包。
+			pip freeze > .txt
+		2）通过ftp软件将项目代码和plist.txt文件上传到服务器。
+
+		3）创建虚拟环境，在虚拟环境上安装包。
+
+			mkvirtualenv 虚拟环境名称
+			pip install -r plist.txt
+
+	WSGI:协议（python web server gateway interface）
+		是一种协议，在生产环境中使用WSGI作为Python web 的服务。只要遵照这些协议，WSGI应用都可以在任何服务器上运行。
+
+		项目默认会生成一个wsgi.py文件，确定了setting模块，application对象
+		application：
+			在Python模块中使用application对象与应用服务器交互
+		setting模块：
+			用于进行项目配置
+
+	uWSGI:服务器
+		uWSGI实现了WSGI所有接口，用C编写，性能稳定效率高。
+		1）pip install uwsgi
+		2）在项目目录下创建uwsgi.ini文件
+			[uwsgi]
+			#使用nginx连接时使用
+			#socket=127.0.0.1:8080
+			#直接做web服务器使用
+			http=127.0.0.1:8080
+			#项目目录
+			chdir=/home/python/Desktop/pytest/test6
+			#项目中wsgi.py文件的目录，相对于项目目录
+			wsgi-file=test6/wsgi.py
+			processes=4
+			threads=2
+			master=True
+			pidfile=uwsgi.pid
+			daemonize=uwsgi.log
+		3）启动。
+			uwsgi --ini uwsgi.ini
+		4）查看。
+			ps ajx|grep uwsgi
+		5）停止。
+			uwsgi --stop uwsgi.pid
+		6）在浏览器中访问服务器， 静态文件如图片是访问不到的
+		7）测试没问题，在uwsgi.ini中将打开socket，注掉http
+		8）重启uwsgi
+
+	Nginx：
+		配置：
+			1）下载nginx后放到桌面上，解压缩。
+				tar zxvf nginx-1.6.3.tar.gz
+			2）进入nginx-1.6.3目录，依次执行以下命令进行安装。
+				./configure
+				make
+				sudo make install
+			3）默认安装到/usr/local/nginx/目录，进入此目录。
+				cd /usr/local/nginx/
+			4）启动。
+				sudo sbin/nginx
+			5）查看进程。
+				ps ajx|grep nginx
+			6）停止。
+				sudo sbin/nginx -s stop
+			7）打开浏览器，输入如下网址：
+				http://127.0.0.1/
+		指向uwsgi项目
+			1）打开conf/nginx.conf文件。
+
+				sudo gedit conf/nginx.conf
+			2）在server节点下添加新的location项，指向uwsgi的ip与端口。	
+		        location / {
+		            #将所有的参数转到uwsgi下
+		            include uwsgi_params;
+		            #uwsgi的ip与端口
+		            uwsgi_pass 127.0.0.1:8080;
+		        }        location / {             #将所有的参数
+		     3）关闭nginx后再开启。
+		     4）打开浏览器，刷新后图片不再显示。
+		      	所有的静态文件都会由nginx处理，不会将请求转到uwsgi
+		静态文件
+			所有的静态文件都会由nginx处理，不会将请求转到uwsgi。
+
+			1）打开conf/nginx.conf文件。
+
+			sudo gedit conf/nginx.conf
+			2）在server节点下添加新的location项，用于处理静态文件。
+
+			    location /static {
+			        alias /var/www/test6/static/;
+			    }
+			3）在服务器上创建如下目录。
+
+			sudo mkdir -vp /var/www/test6/static/
+			修改目录权限。
+
+			sudo chmod 777 /var/www/test6/static/
+
+git:分布式版本控制系统
+	集中式版本控制系统和分布式的区别在于，分布式的中央服务器挂了之后，开发人员还能工作，集中式的代码管理系统是中央服务器挂了就不能工作了。
+
+	 描述：
+	 	1 有一个类似中央服务器的东西保存代码的完整本版
+	 	2 其他人要开发在中央服务器上，拷贝一份代码到自己的电脑上，进行开发。自己写完再推到中央服务器上。
+
+	 中央服务器：
+	 	1.可以自己准备一一台电脑充当服务器的角色，24小时开机
+	 	2，使用GitHub网站，可以提供存储的服务。
+
+	 版本的迭代不会完整的拷贝代码，而是记录在哪里添加了哪些代码，后面的版本是依赖于前面的版本的
+
+	 版本回退：
+		有一个指针指向最终的版本教HEAD ,
+			HEAD^^或者HEAD~2表示上上个版本
+			HEAD^^^或者HEAD~3表示上上上个版本
+		回退到 上上版本
+			git reset --hard HEAD^^
+			git reset --hard HEAD~2
+
+	github作为中央服务器简单工作流程：
+		1,在~/.gitconfig中添加项目在github上的email和name
+			[user]
+				email = xx@xx.com
+				name = xx
+		2.输入一下命令生成ssh秘钥
+			ssh-keygen -t rsa -C "邮箱地址"
+		3.复制~/.ssh/id_rsa.pub中的内容，id_rsa为私钥，id_rsa.pub为公钥
+		4 将复制的内容粘贴在github上的ssh key中生成ssh_key
+		5 在github分支上复制Git地址，选ssh版本的
+		6 在本机上输入一下命令
+			git clone git地址
+		7 项目克隆到本地之后，执行如下命令创建分支pretty.
+			git checkout -b pretty
+			git branch #查看分支
+		8 编写代码
+		9 git add 代码 --->git commit -m "版本号"
+		10 推送分支 git push origin pretty
+
+		11 可以将本地的分支设置为跟踪远程的分支，这样就可以随时对比GitHub上的跟踪的分支和本地分支的区别，方便管理
+			git branch --set-upstream-to=origin/远程分支名称 本地分支名称
+			eg:
+			git branch --set-upstream-to=origin/haha haha
+		12 拉取远程分支上的代码到本地
+			git pull orgin haha
+
+	工作中使用的git
+		项目经理
+			1、项目经理搭建项目的框架
+			2、搭建完项目框架之后，项目经理把项目框架的代码放到服务器上
+		普通员工：
+			1、在自己的电脑上，生成ssh公钥，发送公钥给项目经理，项目经理把它添加到服务器上面
+			2、项目经理给每个组员项目代码的地址，组员把代码下载到自己的电脑上
+			3、组员创建本地分支dev 在dev分支中进行每天的开发
+			4、每个员工开发完自己的代码之后，都需要将代码发布远程的dev分支上。
+
+		Master ：用于保存发布的项目代码 v1.0 v2.0
+		Dev :保存开发过程中的代码
+		
+		merge 有时候会出现问题，添加说明后退出
+			Ccontrol +  s    --->y 
+			 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
