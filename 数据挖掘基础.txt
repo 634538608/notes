@@ -442,7 +442,17 @@ axes子对象：
 		plt.rcParams['font.family'] = ['Arial Unicode MS', 'sans-serif'] #  全局设置支持中文字体，默认 sans-serif
 
 
+
+
+
+
 ===================numpy================================
+没弄懂得地方：
+	where(a>2)
+	np.sort(b axsi=0)
+
+
+
 Numpy是Python的开源数值计算库
 	Numpy用于在大型、多维数组（矩阵）上执行数值运算
 	Numpy是Scipy/Pandas/scikit-learn等科学计算、数据分析、机器学习库的基础库，也是Python数据挖掘的基础
@@ -771,6 +781,694 @@ numpy集合运算
 
 
 ================Pandas===================================
+pandas:最流行的python数据分析库
+	基于numpy，专用于数据处理和数据分析的Python第三方库，最适合处理大型结构化表格数据
+	是2008年wes mckinney于aqr资本做量化分析师时创建
+	借鉴了r的数据结构
+	pandas基于numpy搭建，支持numpy中定义的大部分计算
+	含有使数据分析工作更加简单高效的高级数据结构和操作工具
+	提供了大量和其他技术交互的借口，可视化，方便和其他语言技术的交互和功能扩展
+	底层使用了C 提高了执行效率
+
+数据类型：
+	Series 		一维，带标签数组
+	DataFrame  二维，Series容器（最常用）
+	Panel 		三维，DataFrame容器
+	
+Series:
+	一维的，带标签的数组（类似字典）可以用index设置key值
+	是ndarray数组的派生类型，和数组比没有类型限制
+	由两个numpy数组构成，一组构成对象的键一组构成数组的值
+	numpy 中数组运算操作可以用在Series对象
+	Python字典操作部分可用于Series
+
+一维创造
+	1.a = pd.Series(
+			[value]#list value可以是不同类型额数据
+
+			[value],index=[value]
+
+			{key:value}#dict,通过index可以重设key值
+
+			np.arange(5)#通过numpy生成
+
+			g_values = np.arange(5)
+			g_index = np.arange(9, 4, -1)
+			g = pd.Series(g_values, index = g_index)
+
+	)
+一维	读
+	index和value查询
+		class1.values  输出value的array
+		class1.index 	输出index的array
+		class1.index[2]  输出指定索引值的index值
+	索引查值：
+		class1[1]
+		class1["huang"]
+		class1[[1,2]] #列表里面传列表，注意[]
+		class1[['hong','huang']] #
+	切片：
+		相当于有key:value的列表，和列表的切片一样
+一维类似于ndarray的数组运算:
+	相当于带上key的array计算
+	调用方法有两种写法
+		np.median(class1)  # 中位数
+		class1.median()  # 方法调用写法
+一维类似字典的操作
+	'c' in class1 # 判断此键在不在class1的索引中
+	class1.get('zi', 60)
+		 #从c提取索引zi的值,存在就取出,否则用60代替
+一维修改
+	类似字典的修改
+	class1['ming'] = 0
+	class1['hua','hong'] = 55 
+		# class1[['hua','hong']] = 20
+	class1['hua','hong'] = [35,55]
+	修改索引：
+		class2 = class1.copy() 
+			# 复制副本而非引用视图，类似深拷贝
+		class2.index = ['xiaoming','xiaohua','xiaohong','xiaohuang','xiaobai']
+
+
+DataFrame
+	类似excel 
+	由多个Series对象作为列组成的表格数据形式，每一行的Series值都增加一个公用的索引
+	是Series的容器，可视为带标签数组，或是由Series组成的字典
+索引：
+	行索引，表明不同行，横向索引，叫index，0轴，axis=0
+	列索引，表名不同列，纵向索引，叫columns，1轴，axis=1
+其他说明
+	基本操作类似于Series，依据行列索引操作
+	内存中以一个或多个二维块存放，而不是列表字典或者别的一维数据结构
+	常用于表达二维数据，也可以表达多维数组（层次化索引的表格型结构）
+
+二维创造
+	d = pd.DataFrame([[],[]],index=[],columns=[])
+		#[]为二维数组，index表示行索引，column表示列索引
+series组成字典创造
+	h_values = {
+    'name':pd.Series(['小明','小华','小红','小靑','小兰'],index=[1,2,3,4,5]),
+    'sex':pd.Series([1,0,0,1,0],index=[1,2,3,4,5]),
+    'age':pd.Series([28,38,48,8],index=[2,3,4,5])  # 少一个值自动填充为NaN
+	}
+	h = pd.DataFrame(hv)
+
+	# 指定内层字典键（行索引），没有的值会填充NaN
+	i = pd.DataFrame(h_values, index=[3,4,2,6])
+
+可以使用numpy里面的二维数组创建
+	k = pd.DataFrame(
+    np.random.randn(6,4),
+    index=[1,2,3,4,5,6],
+    columns=['a','b','c','d']
+	)
+
+DataFrame构造函数能接收的数据
+	字典或series列表（一维）	
+		各项成为DataFrame的一行，字典键或series索引的并集成为DataFrame列标
+	二维ndarray	
+		数据矩阵，还可传入行标和列标
+	由列表或元组组成的另一个DataFrame	
+		同 二维ndarray
+	Numpy的maskedArray（一种可用掩码屏蔽无效值的特殊数组）	
+		同 二维ndarray，只是掩码值在结果DataFrame会变成NA/缺失值
+	由数组、列表或元组组成的字典	
+		每个序列会成为DataFrame的一列，注意：所有序列长度必须相同
+	嵌套字典(由字典组成的字典)	
+		各内层字典成为一列，如没指定索引，键会合并成结果的行索引
+	由Series组成的字典	同 
+		嵌套字典
+
+查询一般属性：
+	a.shape  #多少行多少列
+	a.dtypes  # 每个列的属性int object
+	a.index  # 行索引值
+	a.columns  # 列索引值
+	a.values  # 对象值，二维ndarray数组，具体的数据
+
+查询整体情况：
+	a.head(3)  # 显示头部几行，默认5行
+	a.tail(3)  # 显示末尾几行，默认5行
+	a.info()  # 相关信息概览：行数，列数，列索引，列非空值个数，列类型，列类型，内存占用
+	a.describe()  #快速综合统计结果：计数，均值，标准差，最大值，四分位数，最小值
+
+类list/ndarray查询方式：注意 先列后行
+	列：
+		a['name']
+		a.name  # .写法容易与其他预留关键字产生冲突,不推荐
+		a[['name','address']]  # 双中括号，查询多列
+	行：	
+		a[:2]  # 0，1行
+		a[1:2]  # 1行
+		a[2:5:2]  # 2、4行
+	单值：
+		a['name'][2]  # 先列后行
+
+pandas三种专用查询：
+	索引：注意先行后列
+		a.loc[行,列]，标签索引，自定义索引 ，按索引值
+		a.at[] 同上，效率更快
+		a.iloc[行,列]，位置索引，默认索引
+		a.iat[]同上效率更快
+
+		a.loc[1]  # 标签索引
+		a.iloc[1]  # 位置索引，从0开始
+
+		# 查询单列
+		a.loc[:,'name']  # 标签索引
+		a.iloc[:,0]  # 位置索引
+
+		# 查询多行，双中括号
+		a.loc[[2,4]]  # 标签索引
+		a.iloc[[1,3]]  # 位置索引
+
+		# 查询多列
+		a.loc[:,['name','address']]  # 标签索引
+		a.iloc[:,[0,5]]  # 位置索引
+
+		# 查询单个单元格
+		a.loc[1,'name']  # 标签索引，先行后列，一行一列
+		a.at[1,'name']  # 同上，但速度更快效率更高
+
+		a.iloc[0,0]  # 位置索引
+		a.iat[0,0]  # 同上，但速度更快效率更高
+
+		# 查询多个单元格
+		a.loc[1,['name','address']]  # 一行多列，Series
+		a.loc[[1,3],'address']  # 多行一列，Series
+		a.loc[[1,3],['name','address']]  # 多行多列，不连续，DataFrame
+
+		a.iloc[0,[0,5]]
+		a.iloc[[0,2],5]
+		a.iloc[[0,2],[0,5]]
+
+	切片：索引查询简单方便，但不能查询非连续行列区块
+		# 选取一行
+		a.loc[2,:]  # 等价于 a.loc[2]
+		a.iloc[1,:]  # 等价于 a.iloc[1]
+
+		# 选取一列
+		a.loc[:,'sex']
+		a.iloc[:,1]
+
+		# 切片选取连续多行
+		a.loc[:3,:]  # 左闭右闭
+		a.iloc[:3,:]  # 左闭右开
+
+		# 切片选取连续多列
+		a.loc[:,'heigh':'address']
+		a.iloc[:,3:6]
+
+		# 切片选取多行多列的聚合
+		a.loc[3:5,'sex':'heigh'] 
+		a.iloc[2:5,1:4]
+
+	过滤：通过列布尔值过滤、筛选查询
+		# 通过某列值过滤数据，返回布尔值
+		a['grade'] >= 60
+		a.loc[:,'grade'] >= 60
+
+		# 布尔值做DataFrame参数，返回Dataframe对象
+		a[a['grade'] >= 60]
+		a[a.loc[:,'grade'] >= 60]
+
+		# 布尔索引和切片结合
+		a.loc[a['grade'] > 60,'address':]  # 行，列
+
+		#与或非
+		(a['grade'] >= 60) & (a['sex'] == 'female')
+		a[(a['grade'] >= 60) & (a['sex'] == 'female')]
+
+	过滤数据：
+		a > 60 #返回布尔值
+		a < 30	
+
+		a[a > 60] #Ture 返回 FALSE不返回
+		a[a < 30]
+
+		# where过滤
+		dColumns = a[['name','weight','grade']]  
+			# 获取3列数据
+		dBool = dColumns > 60  # 判断布尔值
+		dNan = dColumns[dBool]  # 过滤查询
+		dNan.dropna(how='any')  # 丢掉含有缺失值的行
+
+	isin 通过条件返回整条数据
+		a['address'].isin(['北京海淀','深圳南山'])
+			#返回Ture False
+		a[a['address'].isin(['北京海淀','深圳南山'])]
+			#返回确定的值
+
+	修改：基本上查到给它赋值就可以
+		b['heigh'] = [150,160,170,180,190] 
+			右边只写一个值就表示全都赋上这个值
+		b.loc[[1,3,5],['age','heigh']] = [[10,100],[20,200],[30,300]] # 3行2列
+
+		注意：当查出的数据是混合型数据的时候是不能修改值的
+			b[b > 60] = 1 # 错误，不能在混合数据类型中修改非NaN值
+
+		# 提取唯一数据类型数据
+		c = a.loc[:,['weight','grade']].copy()
+		c2 = c.copy()
+
+		-(c2 > 60) # 非，或 c2 <= 60  '-'表示取反
+
+ 
+增加 add
+
+	为不存在的行或列索引赋值会创建新行列
+	series:
+		s = pd.Series([1,2,3,4,5])
+		s[6] = 10
+		s['username'] = 'Amber'
+		s.index
+	dataframe:
+			# 创建对象
+		a_values = [
+		    ['小明','male',18,170,60,'北京海淀',61],
+		    ['小华','female',28,160,50,'上海静安',74],
+		    ['小红','female',22,175,64,'广州天河',59],
+		    ['小靑','male',31,182,80,'深圳南山',82],
+		    ['小兰','female',25,165,55,'杭州西湖',98],
+		]
+
+		a = pd.DataFrame(
+		    a_values,
+		    index=[1,2,3,4,5],
+		    columns=['name','sex','age','heigh','weight','address','grade']
+			)
+		#增加列
+			b['chinese'] = [50,60,70,80,90]
+		#增加行
+			b.loc['aaa'] = ['小芳','female',24,164,52,'美国加州',95,80,90]
+
+delete 删除
+	Series：drop()
+		s2 = s.drop('ming')
+	dataframe:
+		# 默认删除行，默认只改动视图
+		b.drop(1) # 删除单行
+		b.drop([1,7]) # 删除多行
+
+		# 删除列
+		# axis=1删除列，默认axis=0删除行
+		b.drop('math',axis=1)
+		b.drop(['math','chinese'],axis=1)
+		b
+
+		# inplace=True 改动原数据，默认inplace=False 只改动视图
+		b.drop(['math','chinese'],axis=1,inplace=True)
+
+.name 命名  相当于excel中给第一行和第一列命名
+	series:	
+		s.name = 'uname'
+		s.index.name = 'cname' 
+	dataframe:
+		b.index.name = 'hang'
+		b.columns.name = 'lie'
+
+遍历dataframe:
+	for index, row in a.iterrows():
+	    print(index) # 行索引
+	    print(row) # 值，按行排列
+	    print(row[0]) # 单元格
+
+pandas数据存取(csv)：
+	写入：to_csv()
+		a.to_csv('foo.csv')
+		a.to_csv(
+			    'foo2.csv', # 存入数据
+			    index=False, # 不存储行索引
+			    header=False, # 不存储列索引
+			    encoding='utf-8' # 修改编码
+				)
+	读取：read_csv()
+		pd.read_csv('foo.csv')
+		pd.read_csv(
+		    'foo2.csv', # 文件名
+		    sep=',', # 指定分隔符，csv默认逗号，如果是table表格数据一般为 \t
+		    usecols=[0,1,2,4], # 读取指定列
+		    nrows=10, # 读取前几行
+		    header=None, # 不将第一行设为表头
+		    names=['a','b','c','d'], # 不使用csv表头，自定义表头
+		    encoding='utf-8' # 编码，需要根据文本编码修改，默认utf-8,可以指定为GBK/ascii
+		)
+		csv文件内有汉字等特殊符号时，csv文件编码应为utf-8(无BOM)可默认正常读取，如果编码是ANSI，加参数encoding='gbk'
+		数据内有逗号时，左右加英文半角双引号，可以正常解析
+
+		将某列设为行索引：
+			 index_col='shijian', 
+
+xlsx存取：
+	写入：需要装这个模块：openpyxl
+		a.to_excel('foo.xlsx', sheet_name='Sheet1')
+	读取：需要装这个模块：xlrd
+		pd.read_excel('foo.xlsx', 'Sheet1', index_col=None, na_values=['NA'])
+
+	将多个dataframe写到不同的excel sheet中
+		writer = pd.ExcelWriter('output.xlsx')#创建表对象
+		df.to_excel( #表1
+				    writer, # 写入数据
+				    'Sheet1', # 工作表标签
+				    header=False, # 不存入列索引
+				    index=False # 不存入行索引
+				)
+		a.to_excel(writer,'Sheet2') #表2
+		writer.save() #提交
+	分别读取：
+			# 不将第一行设为表头	
+		pd.read_excel('output.xlsx', 'Sheet1', index_col=None, na_values=['NA'],header=None) 	
+			
+		pd.read_excel('output.xlsx', 'Sheet2', index_col=None, na_values=['NA'])
+
+
+MySQL 存取：
+	读取：
+		pd.io.sql.read_sql()	
+	写入：
+		pd.io.sql.to_sql()
+	注意：
+		to_sql()是直接调用的INDERT语句完成任务，传输速度比较慢，
+		如果想传入大型数据框，最好先导出csv文件再导入数据库中。
+
+	from sqlalchemy import create_engine
+
+	# 连接MySQL数据库，需要安装Python连接库
+	# conda install -c anaconda pymysql 
+
+	dbconnect = 'pymysql' # MySQL连接库，根据使用的连接库修改名称，这里用pymysql
+	dbname = 'aaa' # 数据库名
+	dbusername = 'root' # 数据库用户名
+	dbpwd = 'root' # 数据库密码
+
+	# 连接数据库
+	conn = create_engine('mysql+' + dbconnect + '://' + dbusername + ':' + dbpwd + '@localhost:3306/' + dbname + '?charset=utf8')
+	# 查询数据库
+
+	sql1 = 'SELECT * FROM ccc'
+
+	df1 = pd.read_sql( # pd.io.sql.read_sql()的快捷方式
+	    sql1, # sql语句
+	    conn, # 数据库连接
+	    index_col='id' # 选定某列做行索引，可选
+	)
+	df1
+
+	pd.io.sql.to_sql(
+	    a, # 插入的数据，注意格结构应和MySQL表一致
+	    'ccc', # 表名
+	    con=conn, # 数据库连接
+	    if_exists='append', # 注释见下
+	    index=False # 不将列索引插入数据库中，否则会出错
+	)
+
+	if_exists参数：
+		fail	默认值，如果表存在，报错，什么都不做
+		append	如果表存在，追加数据，如果表不存在创建一个表
+		replace	如果表存在，删了表，再建立一个新表，把数据插入
+
+
+json存取：
+	# 存入JSON
+	a.to_json('foo.json')
+	# 读取JSON
+	pd.read_json('foo.json')	
+
+pkl存取:
+	# 存入pickle
+	a.to_pickle('a.pkl')
+
+	# 读取pickle
+	a_pkl = pd.read_pickle('a.pkl')
+
+HDF5存取：
+	df.to_hdf('foo.h5','df')
+	pd.read_hdf('foo.h5','df')
+	a.to_hdf('foo.h5','abc')
+	pd.read_hdf('foo.h5','abc')
+
+从剪贴板读取：
+	pd.read_clipboard()
+	pd.read_clipboard(header=None) # 不将第一行设为表头
+
+基本统计分析方法：（都是按列算的）
+	.describe()	
+		针对0轴(列)的统计汇总，计数/平均值/标准差/最小值/四分位数/最大值
+	.sum()	
+		计算数据的总和,按0轴计算(各行计算),下同,要按列计算参数1
+	.count()	
+		统计每一列的个数非NaN值数量
+	.mean() .median() .mode()	
+		计算数据的算数平均值/中位数/众数
+	.var() .std()	
+		计算数据的方差/标准差
+	.min() .max()	
+		计算数据的最小值/最大值
+	.idxmin() .idxmax()	
+		计算数据第一个最大值/最小值所在位置的索引，给索引或切片使用(自定义索引，排除null/NA等空值)
+
+	只适用于Series的方法：
+		.argmin() .argmax()	
+			计算数据第一个最大值/最小值所在位置的索引位置
+
+	b.sum()  # 按列求和
+	b.sum(axis = 1)
+
+	a.argmin()  # Series返回最小值的索引
+	b.idxmin()  # Dataframe返回每列最小值的行索引
+
+	a.describe()
+	type(a.describe()) # series对象
+	a.describe()['count']
+
+	b.describe()  #默认0轴运算
+	type(b.describe())  # dataframe对象
+
+	# 返回横行数据,series
+	b.describe().loc['max']
+	b.describe().iloc[7]
+
+	# 返回一列值
+	b.describe()[2]
+	b.describe().loc[:,2]
+
+自定义运算：
+	series:map()
+		def f(x):
+			return x+5-2
+		a.map(f)
+	DataFrame:apple()
+		def f(x):
+		    return pd.Series([x.min(), x.max()], index=['min', 'max'])
+		b.apply(f)  # 默认按列运算
+		b.apply(f, axis=1)  # 按行运算
+
+		将自定义函数应用到DataFrame对象每个值上:
+			def f(x):
+			    d = x + 1 - 2 * 3 / 4
+			    return d
+
+			b.applymap(f)
+
+累计统计分析：
+	.cumsum()	依次给出前1/2/.../n个数的和
+	.cumprod()	依次给出前1/2/.../n个数的积
+	.cummax()	依次给出前1/2/.../n个数的最大值
+	.cummin()	依次给出前1/2/.../n个数的最小值
+
+滚动计算（窗口计算）函数
+	.rolling(w).sum()	依次计算相邻w个元素的和
+	.rolling(w).mean()	依次计算相邻w个元素的算数平均值
+	.rolling(w).var()	依次计算相邻w个元素的方差
+	.rolling(w).std()	依次计算相邻w个元素的标准差
+	.rolling(w).min .max()	依次计算相邻w个元素的最小值/最大值
+
+	b.rolling(2).sum()  # 纵向列,以两个元素为单位,做求和运算
+	b.rolling(3).sum()
+
+分组聚合：
+	数据分析第一步就是计算分组统计
+	Pandas支持运算的数据种类比sql多而且强大
+
+	分组：groupby() 就好像Excel合并单元格
+		Splitting 将数据分组
+		Applying 对每个分组应用不同的function
+		Combining 使用某种数据结果展示结果
+
+				# 分组数据的个数
+		df.groupby('name').size()
+
+		# 遍历分组对象
+		for (method, group) in df.groupby('name'):
+		#     print(method)
+		#     print(group)
+		    print(group.shape)
+
+		# 对分组后的部分列做统计
+		df.groupby('name')['math'].describe()
+		# 行列旋转
+		df.groupby('name')['math'].describe().unstack()
+
+	聚合：aggregate()，或agg()
+		参数可以是列表，列表元素是指标的计算函数或特定的指标名字符串
+		参数可以是字典，函数会根据字典内容对指定列进行不同的指标计算
+		参数可以是系统或自定义函数，各分组都进行计算后返回结果
+
+		d = df.groupby('name').aggregate([min,max,np.mean])
+		#分组后 显示每一列的最大值最小值平均值
+
+		df.groupby('name').aggregate({'chinese':'min','math':'max'})
+		#分组后，显示每组语文的最小值和数学的最大值
+
+		自定义聚合函数：agg()
+			def hs(arr):
+			    return arr.mean()-1
+
+			df.groupby('name').agg(hs)
+
+	分组后筛选：filter
+		def filter_func(x):
+		    return x['math'].mean() >= 60 # 数学成绩平均值大于等于60分
+
+		e = df.groupby('name').filter(filter_func)
+		e.groupby('name').mean()
+
+	对所有元素进行转换计算
+		df.groupby('name').transform(lambda x: x - 60)
+		#df中所有的元素都减去60
+
+	对所有分组进行不同规则的计算
+		def a2(x):
+		    x['chinese'] = x['chinese'] + 10
+		    x['english'] -= 10
+		    return x
+
+		df.groupby('name').apply(a2)
+
+	在 groupby 函数的输入中自定义分配每一行记录所属的分组
+
+	如果我们的输入就是原始数据集 df 中的某一列，那么这一列将被作为分组的依据，这种方法比直接输入列名要麻烦一些
+
+	# 传入结构一样的列，传入索引会替换掉原索引
+	df.groupby(['张三','李四','王五','李四','王五','王五','张三']).mean()
+	df.groupby([0,0,0,0,0,0,0]).mean()
+
+	unstack() 不要堆叠
+	stack() 堆叠
+	fillna()  NaN缺失值，用其他值代替NaN
+
+	# 所有人在所有测试中的数学成绩
+	df.groupby(['name',df['test']])['math'].mean().unstack().fillna(0)
+
+数据规整：
+	数据分析和建模绝大多数工作都是用在数据准备上的，一般获取到的存放在文件或数据库中的数据并不能满足数据处理应用的要求
+
+	pandas提供了一组高级灵活高效的核心函数和算法，能够轻松的将数据规整化为你需要的形式
+
+	规整的一般方法：
+		清理
+		转换
+		合并
+
+清理：含有None的数组等不能直接进行运算
+	在numpy 中使用numpy.nan代表缺失数据，含有np.nan的数据虽然空值部分不能执行运算
+	a.sum(), a.min(), a.max() # 全部返回nan
+	np.nansum(a), np.nanmin(a), np.nanmax(a) # 返回理想值
+
+	在pandas中不论是None还是Nan都会转化为NaN的形式
+	NaN：非数字，not a number，Pandas中它表示缺失或NA值，便于被检测出来
+	本质上就是np.nan
+
+	Pandas的对象可以跳过缺失值直接进行运算
+
+检测是否有缺失值：
+	# 返回布尔值，缺失值为True
+	b.isnull()
+	# 返回布尔值，缺失值为False
+	b.notnull()
+	# 手工过滤缺失值
+	b[b.notnull()]
+
+去掉缺失值，只保留有效值：dropna()
+	# 默认按行去除
+	c.dropna()
+	c.dropna(axis = 'columns')
+	# how='all',行或列所有元素都为缺失值才去除
+	# how='any',行或列出现一个缺失值即去除，默认值
+	c.dropna(axis = 'columns', how = 'all')
+	# 行或列的非缺失值大于等于thresh值才保留，否则去除
+	c.dropna(thresh = 3)
+
+填补缺失值 fillna()
+	# 缺失值填补为固定值
+	b.fillna(1)
+	# 特别功能，缺失值填补为均值
+	b.fillna(b.mean())
+	# 向前填补（forward-fill），默认值，使用缺失值前一个值填补
+	b.fillna(method = 'ffill')
+	# 向后填补（back-fill）
+	b.fillna(method = 'bfill')
+	 # 按行填补 
+	c.fillna(method = 'ffill', axis = 1)
+	# 如果通过字典调用fillna，可对不同列填充不同值
+	c.fillna({0:0.5,1:-1})
+	# 操作默认返回副本，也可以直接修改源数据
+	b2.fillna(0,inplace = True)
+	# limit连续填充数量设置
+	c.fillna(method = 'ffill', limit = 2)
+
+替换值：replace()
+	# 将-999替换为pandas能理解的NA值
+	data.replace(-999, np.nan)
+	# 一次性替换多个值
+	data.replace([-999,-1000], np.nan)
+	# 对不同的值进行不同的替换
+	data.replace([-999,-1000], [np.nan,0]) # 对应结构的列表
+	data.replace({-999:np.nan, -1000:0}) # 字典
+
+映射数据值：map()
+	a = pd.DataFrame([['鬃刷','皮带','煎蛋','观赏'], [10,20,30,40]]).T
+	b = {'鬃刷':'猪','皮带':'牛','毛衣':'羊','观赏':'鱼'}
+
+	# 将DataFrame列值转为字典映射值,如果不对应就返回NaN
+	a[0].map(b)
+
+移除重复数据：duplicated()
+	# 布尔型Series,各列重复值交集，行与行之间重复才重复
+	data.duplicated()
+
+	# 移除重复行
+	data.drop_duplicates()
+	data[-(data.duplicated())] # 用布尔索引也可以
+
+	# 移除自定义列重复行
+	data.drop_duplicates('k1')
+
+	# first默认留下第一次出现的值
+	data.drop_duplicates(['k1', 'k2'],keep = 'first')
+	# last,留下最后一次出现的值
+	data.drop_duplicates(['k1', 'k2'],keep = 'last')
+	# False,删掉所有重复值
+	data.drop_duplicates(['k1', 'k2'],keep = False)
+
+pandas整数规整-转换
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
